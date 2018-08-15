@@ -7,6 +7,7 @@ See VPP-4.3.2 document for details.
 __precompile__(true)
 module VISA
 using Compat
+using Libdl
 
 # This package can prevent other packages from being tested on Travis CI because it
 # expects a VISA library to be present and errors out when one is absent. The env variable
@@ -18,7 +19,7 @@ using Compat
 #
 # tl;dr don't worry about it, things should work as before unless you set this env variable
 !haskey(ENV, "VISA_JL_NO_LOAD") &&
-    include(joinpath(Pkg.dir("VISA"),"deps","deps.jl"))
+    include(joinpath(@__DIR__,"..","deps","deps.jl"))
 
 const defaultBufferSize = 0x00000400
 
@@ -37,7 +38,7 @@ for typePair = [("UInt32", UInt32),
                 ("Int16", Int16),
                 ("UInt8", UInt8),
                 ("Int8", Int8),
-                ("Addr", Void),
+                ("Addr", Nothing),
                 ("Char", Int8),
                 ("Byte", UInt8),
                 ("Boolean", UInt16),
@@ -186,7 +187,7 @@ end
 function viGetAttribute(viObj::ViObject, attrName::ViAttr)
     value = ViAttrState[0]
     @check_status ccall((:viGetAttribute, libvisa), ViStatus,
-                        (ViObject, ViAttr, Ptr{Void}),
+                        (ViObject, ViAttr, Ptr{Nothing}),
                         viObj, attrName, value)
     value[]
 end
